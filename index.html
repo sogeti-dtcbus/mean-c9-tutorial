@@ -11,6 +11,9 @@
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
+        
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="css/presentation.css">
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -37,6 +40,123 @@
                         <li class="fragment">Angular - Web UI Application</li>
                         <li class="fragment">NodeJS - The technology that makes this stack possible</li>
                     </ul>
+                </section>
+                <section>
+                    <section>
+                        <h4>Cloud9 Setup</h4>
+                        <ul>
+                            <li>We'll be using the Cloud9 online IDE</li>
+                            <li>Log into your C9 account</li>
+                            <li>Start a HTML workspace</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Node Setup</h4>
+                        <ol>
+                            <li>Once your fresh workspace has spun up, we’ll be using the c9 bash terminal to update node and npm to the most recent versions. Go ahead and run the following:</li>
+                            <pre><code class="hljs" data-trim>$ nvm install node && nvm alias default node && npm update npm -g</code></pre></li>
+                            <li>Now, we’ll check to ensure that the latest versions of node and npm are installed (as of April 2017, this tutorial is using node 7.9.0 and npm 4.6.1)</li>
+                            <pre><code class="hljs" data-trim>$ node -v</code></pre>
+                            <pre><code class="hljs" data-trim>$ npm -v</code></pre>
+                        </ol>                        
+                    </section>
+                    <section>
+                        <h4>Angular Setup</h4>
+                        <ol>
+                            <li>Next, we’ll install the Angular CLI (This can take some time to install...)</li>
+                            <pre><code class="hljs" data-trim>$ npm install -g @angular/cli</code></pre>
+                            <li>Create your new AngularJS 2 application (This can take some time to build...)</li>
+                            <pre><code class="hljs" data-trim>$ ng new mean-app</code></pre>
+                        </ol>
+                    </section>
+                    <section>
+                        <h4>Angular Setup</h4>
+                        <ol>
+                            <li>Once completed, you will now have a ‘mean-app’ project directory, CD into it</li>
+                            <pre><code class="hljs" data-trim>$ cd mean-app</code></pre>
+                            <li>Now, let’s test it to ensure everything is working correctly</li>
+                            <pre><code class="hljs" data-trim>$ ng serve</code></pre>
+                        </ol>
+                        <p>You should receive: webpack: Compiled successfully</p>
+                        <p>Exit the currently running code using CTRL/CMD+C </p>
+                    </section>
+                    <section>
+                        <h4>MongoDB Setup</h4>
+                        <ol>
+                            <li>Next, we’ll install MongoDB from within the ‘mean-app’ directory</li>
+                            <pre><code class="hljs" data-trim>$ sudo apt-get install -y mongodb-org</code></pre>
+                            <li>Now, we’ll setup our data storage for MongoDB</li>
+                            <pre><code class="hljs" data-trim>
+                                $ mkdir data
+                                $ echo 'mongod --bind_ip=$IP --dbpath=data --nojournal --rest "$@"' > mongod 
+                                $ chmod a+x mongod
+                            
+                                //-Parameters used for c9
+                                //--dbpath=data defaults to /var/db (inaccessible)
+                                //--nojournal - mongodb allocates 2GB journal file (c9 quota) 
+                                //--bind_ip=$IP - because you can't bind to 0.0.0.0
+                                //--rest - runs on default port 28017
+                            </code></pre>
+                        </ol>                        
+                    </section>
+                    <section>
+                        <h4>MongoDB Setup</h4>
+                        <ol>
+                            <li>Next, we'll test MongoDB</li>
+                            <pre><code class="hljs" data-trim>$ ./mongod</code></pre>
+                            <span>Alternatively, you may use the following c9 command to start MongoDB in a hidden terminal (although any errors will be hidden, they can be viewed by checking the referenced file printed after the command</span>
+                            <pre><code class="hljs" data-trim>$ nohup ./mongod &</code></pre>
+                            <li>Now, we’ll setup our data storage for MongoDB</li>
+                        </ol>                        
+                    </section>
+                    <section>
+                        <h4>MongoDB Setup</h4>
+                        <ol>
+                            <li>With MongoDB successfully running, open a new terminal window in your ‘mean-app’ directory (right-click the directory ‘Open Terminal Here)</li>
+                            <li>Now, we’ll need to wire up MongoDB to our node server. We’ll use the touch command, the easiest way to create an empty file using bash, to create our server.js file:</li>
+                            <pre><code class="hljs" data-trim>$ touch server.js</code></pre>
+                            <li>Once created, open the file to edit it using the c9 Workspace directory explorer</li>
+                        </ol>                        
+                    </section>
+                    <section>
+                        <h4>MongoDB Setup</h4>
+                        <span>server.js</span>
+                        <pre><code>
+var express = require("express"); 
+var bodyParser = require("body-parser"); 
+var mongodb = require("mongodb"); 
+var ObjectID = mongodb.ObjectID; 
+var CONTACTS_COLLECTION = "contacts"; 
+var app = express(); 
+
+app.use(bodyParser.json()); 
+
+// Create a database variable outside of the database connection callback to reuse the connection pool in your app. 
+var db; 
+
+// Connect to the database before starting the application server.
+
+mongodb.MongoClient.connect("mongodb://" + process.env.IP + ":27017", function(err, database) {
+    if (err) {
+        console.log(err);
+        process.exit(1);
+    }
+
+    // Save database object from the callback for reuse.
+    db = database;
+    console.log("Database connection ready");
+
+    // Initialize the app.
+    var server = app.listen(process.env.PORT || 8080, function() {
+        var port = server.address().port;
+        console.log("App now running on port", port);
+    });
+}); 
+// Save database object from the callback for reuse. 
+// CONTACTS API ROUTES BELOW
+                        </code></pre>
+                        <p class="notes">We want to use our database connection pool as often as possible to best manage our available resources. We initialize the db variable in the global scope so that the connection can be used by all the route handlers. We initialize the app only after the database connection is ready. This ensures that the application won’t crash or error out by trying database operations before the connection is established.</p>
+                    </section>
                 </section>
 			</div>
 		</div>
