@@ -256,6 +256,46 @@ app.delete("/api/contacts/:id", function(req, res) {
                     </section>
                     <section>
                         <h4>Test Endpoints</h4>
+                        <p>We’ve  reached  the  point  that  we  can  now  test  our  endpoints  to  confirm  everything  is  working  properly so far. Open your package.json file and replace the ‘start’ script with</p>
+                        <pre><code>$"start": "node server.js"</code></pre>
+                        <p>Perform some pre-test checks:</p>
+                        <ul>
+                            <li>Ensure that you’re in a bash terminal in the ‘mean-app’ directory</li>
+                            <li>Ensure that your MongoDB is running</li>
+                            <li>Ensure that you have saved your server.js and package.json files</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Test Endpoints</h4>
+                        <span>Kick off your server.js file by running</span>
+                        <pre><code>$  node server.js</code></pre>
+                        <span>A new terminal window will open, and if all is successful you should see the following output</span>
+                        <pre><code>
+Your code is running at https://your-project-name.c9users.io. 
+Important: use process.env.PORT as the port and process.env.IP as the host in your scripts! (node:7793)
+DeprecationWarning: node --debug is deprecated. 
+Please use node --inspect instead. 
+Debugger listening on 127.0.0.1:15454
+Database connection ready
+App now running on port 8080
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h4>Test Endpoints</h4>
+                        <span>The application is now live. We’ll use cURL to issue a POST request from a bash terminal</span>
+                        <pre><code>$ curl -H "Content-Type: application/json" -d '{"name":"ST Saw Sharpening", "email": "sogeti-dtcbus@gmail.com"}' https://your-project-name.c9users.io/api/contacts</code></pre>
+                        <span>Once you issue the POST request, if successful, you will immediately be presented with the output array we setup with our endpoints</span>
+                        <pre><code>
+{
+    "name":"ST Saw Sharpening",
+    "email":"sogeti-dtcbus@gmail.com",
+    "createDate":"2017-04-27T23:56:23.179Z",
+    "_id":"590285276deeac1e715242da"
+} 
+                        </code></pre>
+                    </section>
+                    <section>
+                        <p><span>Now, open a browser window and go to the https://your-project-name.c9users.io/api/contactsURL to see that you have indeed posted a request and the array is now stored in MongoDB!</span></p>
                     </section>
                 </section>
 			</div>
