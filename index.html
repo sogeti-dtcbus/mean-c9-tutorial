@@ -49,6 +49,7 @@
                             <li>Log into your C9 account</li>
                             <li>Start a HTML workspace</li>
                         </ul>
+                        <p>Follow the set up slides below...</p>
                     </section>
                     <section>
                         <h4>Node Setup</h4>
@@ -296,6 +297,226 @@ App now running on port 8080
                     </section>
                     <section>
                         <p><span>Now, open a browser window and go to the https://your-project-name.c9users.io/api/contactsURL to see that you have indeed posted a request and the array is now stored in MongoDB!</span></p>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h4>Angular 2 Project Framework</h4>
+                        <p>We’re now ready to setup the AngularJS 2 project structure for our web application. The src/appfolder holds our project code, so we’ll put our work in there</p>
+                        <p>Now, stop your MongoDB and mean-app/serve processes, using CTRL/CMD+C in the respective terminals</p>
+                        <p>Next,   create   a   subdirectory   called   src/app/contacts.   The   contacts   folder   will   contain   the   application logic for displaying and handling contacts</p>
+                        <pre><code>$  mkdir src/app/contacts </code></pre>                        
+                    </section>
+                    <section>
+                        <h4>Angular 2 Project Framework</h4>
+                        <p>Now, we’ll create a contact class file that will help us keep our schema consistent with what we defined previously in the Implement the API endpoints step</p>
+                        <pre><code>$  ng generate class contacts/contact</code></pre>
+                        <p>The  contact  class  will  be  used  by  our  components.  Each  component  controls  a  template  and  is  where we define our application logic:</p>
+                        <pre><code>
+$  ng generate component contacts/contact-details 
+$  ng generate component contacts/contact-list
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Project Framework</h4>
+                        <p>Next, we’ll create an AngularJS 2 service that will be used by our components to send and receive data</p>
+                        <pre><code>$  ng generate service contacts/contact</code></pre>
+                        <ul>
+                            <li>Upon completion of the last command, you will receive the following warning:</li>
+                            <li>WARNING Service is generated but not provided, it must be provided to be used</li>
+                            <li>Not to worry, as we will be defining our service in the following step</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Project Framework</h4>
+                        <p>Now,  we’ll  define  the  contact  class  in  the  src/app/contacts/contact.cs file. Replace  with  the following code</p>
+                        <pre><code>
+export class Contact {
+    _id?: string;
+    name: string;
+    email: string;
+    phone: {     
+        mobile: string;     
+        work: string;
+    }
+} 
+                        </code></pre>
+                        <p class="notes">MongoDB by default creates an _id ObjectId field for each document that is inserted into the database. When we create a contact in our client-side Angular app we’ll leave the _id field blank because it will be auto-generated on the server side</p>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Project Framework</h4>
+                        <p class="notes">Next, we’ll create the contact service. It will act as the client-side wrapper for the RESTful API endpoints that the web application needs. Replace your src/app/contacts/contact.service.ts code with the following</p>
+                        <pre><code>
+import { Injectable } from '@angular/core';
+import { Contact } from './contact';
+import { Http, Response } from '@angular/http';
+import 'rxjs/add/operator/toPromise';
+
+@Injectable() export class ContactService {
+    private contactsUrl = '/api/contacts';
+    constructor(private http: Http) {} 
+
+    // get("/api/contacts")     
+
+    getContacts(): Promise<Contact[]> {
+        return this.http.get(this.contactsUrl)
+            .toPromise()
+            .then(response => response.json() as Contact[])
+            .catch(this.handleError);
+    }    
+
+    // post("/api/contacts")
+
+    createContact(newContact: Contact): Promise<Contact> {
+        return this.http.post(this.contactsUrl, newContact)
+            .toPromise()
+            .then(response => response.json() as Contact)
+            .catch(this.handleError);
+    }    
+
+    // get("/api/contacts/:id") endpoint not used by Angular app
+
+    // delete("/api/contacts/:id")
+
+    deleteContact(delContactId: String): Promise<String> {
+        return this.http.delete(this.contactsUrl + '/' + delContactId)
+            .toPromise()
+            .then(response => response.json() as String)
+            .catch(this.handleError);
+    }    
+
+    // put("/api/contacts/:id")
+
+    updateContact(putContact: Contact): Promise<Contact> {
+        var putUrl = this.contactsUrl + '/' + putContact._id;
+
+        return this.http.put(putUrl, putContact).toPromise()
+            .then(response => response.json() as Contact)
+            .catch(this.handleError);
+    }    
+
+    private handleError (error: any) {
+        let errMsg = (error.message) ? error.message : error.status ? `${error.status} - ${error.statusText}` : 'Server error';
+        console.error(errMsg); // log to console instead
+    }
+}
+                        </code></pre>
+                        <p class="notes">At the top of the contact.service.ts file we import the contact class that we created along with the built-in AngularJS 2 $http service. By default, $http requests return an Angular Observable. To make the $http service easier to work with, we have imported the RxJS toPromise operator to allow us to convert the Angular Observable to a Promise. With the $http service we use relative URL paths (e.g., “/api/contacts”) as opposed to absolute paths like “your-project-name.c9users.io/api/contacts”</p>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h4>Angular 2 Project Template I</h4>
+                            <p class="notes">To  display  a  contact  list  to  the  user,  we’ll  need  a  template  (or  view)  and  the  application  logic  to  control    that    template.    Let’s    first    create    the    template    by    replacing    the    code    fromsrc/app/contacts/contact-list/contact-list.component.html with</p>
+                            <pre><code>
+<div class="row">
+    <div class="col-md-  5">
+        <h2>Contacts</h2>     
+        <ul class="list-group">       
+            <li class="list-group-item"
+                *ngFor="let contact of contacts"
+                (click)="selectContact(contact)"
+                [class.active]="contact === selectedContact">
+                {{contact.name}}
+            </li>
+        </ul>
+        <button class="btn btn-warning" (click)="createNewContact()">New</button>
+    </div>
+    <div class="col-md-  5 col-md-  offset-2">
+        <contact-details 
+            [contact]="selectedContact"
+            [createHandler]="addContact"
+            [updateHandler]="updateContact"
+            [deleteHandler]="deleteContact">
+        </contact-details>
+    </div>
+</div> 
+                            </code></pre>
+                            <p class="notes">This template displays a contact list and includes the contact-details template, which we’ll implement in the next step.</p>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Application Logic I</h4>
+                            <p class="notes">Next, we’ll add in our application logic to the contact-list.component.ts file and replace the code with the following</p>
+                            <pre><code>
+import { Component, OnInit } from '@angular/core';
+import { Contact } from '../contact';
+import { ContactService } from '../contact.service';
+import { ContactDetailsComponent } from '../contact-details/contact-details.component';
+
+@Component({
+    selector: 'contact-list',
+    templateUrl: './contact-list.component.html',
+    styleUrls: ['./contact-list.component.css'],
+    providers: [ContactService]
+})
+
+export class ContactListComponent implements OnInit {
+    contacts: Contact[]
+    selectedContact: Contact constructor(private contactService: ContactService) {}
+  
+    ngOnInit() {
+        this.contactService.getContacts().then((contacts: Contact[]) => {
+            this.contacts = contacts.map((contact) => {
+                if (!contact.phone) {
+                    contact.phone = {
+                        mobile: '',
+                        work: ''
+                    }
+                }
+                return contact;
+            });
+        });
+    }
+  
+    private getIndexOfContact = (contactId: String) => {
+        return this.contacts.findIndex((contact) => {
+            return contact._id === contactId;
+        });
+    }
+    
+    selectContact(contact: Contact) {
+        this.selectedContact = contact
+    }
+  
+    createNewContact() {
+        var contact: Contact = {
+            name: '',
+            email: '',
+            phone: {
+                work: '',
+                mobile: ''
+            }
+        }; 
+      	// By default, a newly-created contact will have the selected state.     
+      	this.selectContact(contact);
+    }
+  
+  	deleteContact = (contactId: String) => {    
+    	var idx = this.getIndexOfContact(contactId);
+      	if (idx !== -1) {
+        	this.contacts.splice(idx, 1);
+          	this.selectContact(null);
+        }    
+      	return this.contacts;
+    }
+    
+    addContact = (contact: Contact) => {
+        this.contacts.push(contact);
+        this.selectContact(contact);
+        return this.contacts;
+    }
+    
+    updateContact = (contact: Contact) => {
+        var idx = this.getIndexOfContact(contact._id);
+        if (idx !== -1) {
+            this.contacts[idx] = contact;
+            this.selectContact(contact);
+        }
+        return this.contacts;
+    }
+}
+                            </code></pre>
+                            <p class="notes">When the application is initialized, ngOnInit() is called. Upon app start, we use contact service to retrieve the full contact list from the API server. Once the contact list is retrieved, it is stored into a local copy of the contact list. It’s important to store a local copy of the contact list so that we can dynamically change the contact list whenever a new user is created, modified, or deleted without having to make extra HTTP requests to the API server</p>
                     </section>
                 </section>
 			</div>
