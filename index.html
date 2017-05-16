@@ -49,7 +49,7 @@
                             <li>Log into your C9 account</li>
                             <li>Start a HTML workspace</li>
                         </ul>
-                        <p>Follow the set up slides below...</p>
+                        <p>Follow the setup slides below...</p>
                     </section>
                     <section>
                         <h4>Node Setup</h4>
@@ -520,6 +520,170 @@ export class ContactListComponent implements OnInit {
                     </section>
                     <section>
                         <h4>Angular 2 Template II</h4>
+                        <pre><code>
+<div *ngIf="contact" class="row">
+    <div class="col-md-  12">
+        <h2 *ngIf="contact._id">Contact Details</h2>
+        <h2 *ngIf="!contact._id">New Contact</h2>
+    </div>
+</div>
+<div *ngIf="contact" class="row">
+    <form class="col-md-  12">
+        <div class="form-group"> <label for="contact-name">Name</label> <input class="form-control" name="contact-name" [(ngModel)]="contact.name" placeholder="Name" /> </div>
+        <div class="form-group"> <label for="contact-email">Email</label> <input class="form-control" name="contact-email" [(ngModel)]="contact.email" placeholder="support@mlab.com" /> </div>
+        <div class="form-group"> <label for="contact-phone-mobile">Mobile</label> <input class="form-control" name="contact-phone-mobile" [(ngModel)]="contact.phone.mobile" placeholder="1234567890" /> </div>
+        <div class="form-group"> <label for="contact-phone-work">Work</label> <input class="form-control" name="contact-phone-work" [(ngModel)]="contact.phone.work" placeholder="0123456789" /> </div> 
+        <button class="btn btn-primary" *ngIf="!contact._id" (click)="createContact(contact)">Create</button> <button class="btn btn-info" *ngIf="contact._id" (click)="updateContact(contact)">Update</button> <button class="btn btn-danger" *ngIf="contact._id" (click)="deleteContact(contact._id)">Delete</button>
+    </form>
+</div>
+                        </code></pre>
+                        <p class="notes">Note that our template calls three functions: createContact(), updateContact(), and deleteContact()</p>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Application Logic II</h4>
+                        <p class="notes">Now,  we’ll  need  to  implement  those  functions  in  our  component  file  src/contacts/contact-details/contact-details.component.ts. Let’s change our component file to the following (continued in following page)</p>
+                        <pre><code>
+import { Component, Input } from '@angular/core';
+import { Contact } from '../contact';
+import { ContactService } from '../contact.service';
+
+@Component({
+    selector: 'contact-details',
+    templateUrl: './contact-details.component.html',
+    styleUrls: ['./contact-details.component.css']
+})
+
+export class ContactDetailsComponent { 
+    @Input()
+    contact: Contact; 
+    @Input()
+    createHandler: Function;
+    @Input()
+    updateHandler: Function;
+    @Input()
+    deleteHandler: Function;
+    
+    constructor (private contactService: ContactService) {}
+    
+    createContact(contact: Contact) {
+    
+        this.contactService.createContact(contact).then((newContact: Contact) => {
+            this.createHandler(newContact);
+        });
+    }
+    
+    updateContact(contact: Contact): void {
+        this.contactService.updateContact(contact).then((updatedContact: Contact) => {
+            this.updateHandler(updatedContact);
+        });
+    }
+    
+    deleteContact(contactId: String): void {
+        this.contactService.deleteContact(contactId).then((deletedContactId: String) => {
+            this.deleteHandler(deletedContactId);
+        });
+    }
+} 
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h4>Angular 2 Template III &amp; Bootstrap</h4>
+                        <p class="notes">With our contact list and contact details components created, we now need to configure our app to display these templates to the user. The default template is the src/app/app.component.html, which we’ll change to the following code</p>
+                        <pre><code>
+<div class="container">
+    <contact-list></contact-list>
+</div>
+                        </code></pre>
+                        <p class="notes">To add some style to our app, we’ll add bootstrap to our project. Add the following line inside the head tag of src/index.html</p>
+                        <pre><code>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h4>Project Cleanup</h4>
+                        <p class="notes">With our Angular code finished, we’re now almost ready to deploy the application. We’ll start by modifying  thepackage.json  file.  The  finalized  package.json  file  should  look  like  the  following</p>
+                        <pre><code>
+{
+    "name": "mean-app",
+    "version": "1.0.0",
+    "license": "MIT",
+    "angular-cli": {},
+    "scripts": {
+        "ng": "ng",
+        "start": "node server.js",
+        "lint": "tslint \"src/**/*.ts\"",
+        "test": "ng test",
+        "pree2e": "webdriver-manager update --standalone false --gecko false",
+        "e2e": "protractor",
+        "postinstall": "ng build"
+    },
+    "private": true,
+    "dependencies": {
+        "@angular/common": "^4.0.0",
+        "@angular/compiler": "^4.0.0",
+        "@angular/cli": "1.0.1",
+        "@angular/core": "^4.0.0",
+        "@angular/forms": "^4.0.0",
+        "@angular/http": "^4.0.0",
+        "@angular/platform-browser": "^4.0.0",
+        "@angular/platform-browser-dynamic": "^4.0.0",
+        "@angular/router": "^4.0.0",
+        "body-parser": "^1.17.1",
+        "core-js": "^2.4.1",
+        "express": "^4.15.2",
+        "mongodb": "^2.2.26",
+        "rxjs": "^5.1.0",
+        "ts-helpers": "^1.1.1",
+        "zone.js": "^0.8.4"
+    },
+    "devDependencies": {
+        "@angular/cli": "1.0.1",
+        "@angular/compiler-cli": "^4.0.0",
+        "@types/jasmine": "2.5.38",
+        "@types/node": "~6.0.60",
+        "codelyzer": "~2.0.0",
+        "jasmine-core": "~2.5.2",
+        "jasmine-spec-reporter": "~3.2.0",
+        "karma": "~1.4.1",
+        "karma-chrome-launcher": "~2.0.0",
+        "karma-cli": "~1.0.1",
+        "karma-jasmine": "~1.1.0",
+        "karma-jasmine-html-reporter": "^0.2.2",
+        "karma-coverage-istanbul-reporter": "^0.2.0",
+        "protractor": "~5.1.0",
+        "ts-node": "~2.0.0",
+        "tslint": "~4.5.0",
+        "typescript": "~2.2.0"
+    }
+}
+                        </code></pre>
+                        <p class="notes">Changes to note: We moved “angular-cli” library from “devDependencies” to “dependencies”. This will install the Angular CLI for production dependencies used by c9. We added “ng build” as a “postinstall” script. This will build the Angular application after library dependencies have been installed.</p>
+                    </section>
+                    <section>
+                        <h4>Project Cleanup</h4>
+                        <p>The  ng  build  command  stores  the  Angular  build  artifacts  in  the  dist/ directory.  We’ll  configure  our Express application to serve the Angular app by creating a link to the dist/ directory. Modify the server.js code to include the last two lines of code (around line 10)</p>
+                        <pre><code>
+var express = require("express");
+var bodyParser = require("body-parser");
+var mongodb = require("mongodb");
+var ObjectID = mongodb.ObjectID;
+var CONTACTS_COLLECTION = "contacts";
+var app = express();
+app.use(bodyParser.json()); // Create link to Angular build directory var distDir = __dirname + "/dist/"; app.use(express.static(distDir));
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h4>Launching the MEAN Angular 2 App</h4>
+                        <p class="notes">If your MongoDB is still running, proceed to the next step, otherwise kick it off silently from your bash terminal</p>
+                        <pre><code>$ nohup ./mongod &</code></pre>
+                        <p class="notes">Next, we’ll build our AngularJS 2 application using:</p>
+                        <pre><code>$ ng build</code></pre>
+                        <p class="notes">Finally, we’ll start node for use on c9 by entering</p>
+                        <pre><code>$ node server.js</code></pre>
+                        <p>Test your MEAN App by going to “Preview Preview Running Application” You can now view existing  posts,  add  new  ones,  update  existing  or  delete  from  your  app.  You  can  also  copy  your  c9users.io link and share it—your project is public, so anyone with the link will have access.</p>
                     </section>
                 </section>
 			</div>
